@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <name>SASS Compiler Plugin</name>
+  <description>Maven Plugin that compiles SASS files</description>
+  <groupId>org.bola</groupId>
+  <artifactId>modern-app</artifactId>
+  <version>0.1</version>
+  <goalPrefix>modern-app</goalPrefix>
+  <isolatedRealm>false</isolatedRealm>
+  <inheritedByDefault>true</inheritedByDefault>
+  <mojos>
+    <mojo>
+      <goal>watch</goal>
+      <description></description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <implementation>org.jasig.maven.plugin.sass.WatchMojo</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>false</threadSafe>
+      <parameters>
+        <parameter>
+          <name>buildDirectory</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Build directory for the plugin.</description>
+        </parameter>
+        <parameter>
+          <name>destination</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Where to put the compiled CSS files</description>
+        </parameter>
+        <parameter>
+          <name>excludes</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines which of the included files in the source directories to exclude (none by default).</description>
+        </parameter>
+        <parameter>
+          <name>failOnError</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Fail the build if errors occur during compilation of sass/scss templates.</description>
+        </parameter>
+        <parameter>
+          <name>gemPaths</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines paths where jruby will look for gems. E.g. a maven build could download
+gems into ${project.build.directory}/rubygems and a gemPath pointed to this
+directory. Finally, individual gems can be loaded via the &amp;lt;gems&gt; configuration.</description>
+        </parameter>
+        <parameter>
+          <name>gems</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines gems to be loaded before Sass/Compass. This is useful to add gems
+with custom Sass functions or stylesheets. Gems that hook into Compass
+are transparently added to Sass&apos; load_path.</description>
+        </parameter>
+        <parameter>
+          <name>includes</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines files in the source directories to include
+
+Defaults to: &quot;**&amp;#47;scss&quot;</description>
+        </parameter>
+        <parameter>
+          <name>relativeOutputDirectory</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines an additional path section when calculating the destination for the SCSS file. Allows,
+for example &quot;/media/skins/universality/coal/scss/portal.scss&quot; to end up at &quot;/media/skins/universality/coal/portal.css&quot;
+by specifying &quot;..&quot;</description>
+        </parameter>
+        <parameter>
+          <name>resources</name>
+          <type>java.util.List</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Sources for compilation with their destination directory containing SASS files. Allows
+for multiple resource sources and destinations. If specified it precludes the direct
+specification of sassSourceDirectory/relativeOutputDirectory/destination parameters.
+&lt;br/&gt;
+Example configuration
+&lt;pre&gt;
+     &amp;lt;resource&gt;
+         &amp;lt;source&gt;
+             &amp;lt;directory&gt;${basedir}/src/main/webapp&amp;lt;/directory&gt;
+             &amp;lt;includes&gt;
+                 &amp;lt;include&gt;**&amp;#47;scss&amp;lt;/include&gt;
+             &amp;lt;/includes&gt;
+         &amp;lt;/source&gt;
+         &amp;lt;relativeOutputDirectory&gt;..&amp;lt;/relativeOutputDirectory&gt;
+         &amp;lt;destination&gt;${project.build.directory}/${project.build.finalName}&amp;lt;/destination&gt;
+     &amp;lt;/resource&gt;
+&lt;/pre&gt;</description>
+        </parameter>
+        <parameter>
+          <name>sassOptions</name>
+          <type>java.util.Map</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines options for Sass::Plugin.options. See
+{@link ://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html#options }
+If the value is a string it must by quoted in the maven configuration:
+&amp;lt;cache_location&gt;&apos;/tmp/sass&apos;&amp;lt;/cache_location&gt; &lt;br/&gt;
+If no options are set the default configuration set is used which is:
+
+&lt;pre&gt;
+&amp;lt;unix_newlines&gt;true&amp;lt;/unix_newlines&gt;
+&amp;lt;cache&gt;true&amp;lt;/cache&gt;
+&amp;lt;always_update&gt;true&amp;lt;/always_update&gt;
+&amp;lt;cache_location&gt;${project.build.directory}/sass_cache&amp;lt;/cache_location&gt;
+&amp;lt;style&gt;:expanded&amp;lt;/style&gt;
+&lt;/pre&gt;</description>
+        </parameter>
+        <parameter>
+          <name>sassSourceDirectory</name>
+          <type>java.io.File</type>
+          <required>true</required>
+          <editable>true</editable>
+          <description>Directory containing SASS files, defaults to the Maven Web application sources directory (src/main/webapp)</description>
+        </parameter>
+        <parameter>
+          <name>useCompass</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Enable the use of Compass style library mixins, this emulates the
+{@code --compass} commandline option of Sass.</description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <buildDirectory implementation="java.io.File" default-value="${project.build.directory}">${buildDirectory}</buildDirectory>
+        <destination implementation="java.io.File" default-value="${project.build.directory}/${project.build.finalName}">${encoding}</destination>
+        <failOnError implementation="boolean" default-value="true"/>
+        <gemPaths implementation="java.lang.String[]" default-value="${project.build.directory}/rubygems"/>
+        <relativeOutputDirectory implementation="java.lang.String" default-value=".."/>
+        <sassSourceDirectory implementation="java.io.File" default-value="${basedir}/src/main/webapp"/>
+        <useCompass implementation="boolean" default-value="false"/>
+      </configuration>
+    </mojo>
+    <mojo>
+      <goal>update-stylesheets</goal>
+      <description>Mojo that compiles SASS Templates into CSS files. Uses JRuby to execute a generated script that calls the SASS GEM</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <phase>process-sources</phase>
+      <implementation>org.jasig.maven.plugin.sass.UpdateStylesheetsMojo</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <threadSafe>false</threadSafe>
+      <parameters>
+        <parameter>
+          <name>buildDirectory</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Build directory for the plugin.</description>
+        </parameter>
+        <parameter>
+          <name>destination</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Where to put the compiled CSS files</description>
+        </parameter>
+        <parameter>
+          <name>excludes</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines which of the included files in the source directories to exclude (none by default).</description>
+        </parameter>
+        <parameter>
+          <name>failOnError</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Fail the build if errors occur during compilation of sass/scss templates.</description>
+        </parameter>
+        <parameter>
+          <name>gemPaths</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines paths where jruby will look for gems. E.g. a maven build could download
+gems into ${project.build.directory}/rubygems and a gemPath pointed to this
+directory. Finally, individual gems can be loaded via the &amp;lt;gems&gt; configuration.</description>
+        </parameter>
+        <parameter>
+          <name>gems</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines gems to be loaded before Sass/Compass. This is useful to add gems
+with custom Sass functions or stylesheets. Gems that hook into Compass
+are transparently added to Sass&apos; load_path.</description>
+        </parameter>
+        <parameter>
+          <name>includes</name>
+          <type>java.lang.String[]</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines files in the source directories to include
+
+Defaults to: &quot;**&amp;#47;scss&quot;</description>
+        </parameter>
+        <parameter>
+          <name>relativeOutputDirectory</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines an additional path section when calculating the destination for the SCSS file. Allows,
+for example &quot;/media/skins/universality/coal/scss/portal.scss&quot; to end up at &quot;/media/skins/universality/coal/portal.css&quot;
+by specifying &quot;..&quot;</description>
+        </parameter>
+        <parameter>
+          <name>resources</name>
+          <type>java.util.List</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Sources for compilation with their destination directory containing SASS files. Allows
+for multiple resource sources and destinations. If specified it precludes the direct
+specification of sassSourceDirectory/relativeOutputDirectory/destination parameters.
+&lt;br/&gt;
+Example configuration
+&lt;pre&gt;
+     &amp;lt;resource&gt;
+         &amp;lt;source&gt;
+             &amp;lt;directory&gt;${basedir}/src/main/webapp&amp;lt;/directory&gt;
+             &amp;lt;includes&gt;
+                 &amp;lt;include&gt;**&amp;#47;scss&amp;lt;/include&gt;
+             &amp;lt;/includes&gt;
+         &amp;lt;/source&gt;
+         &amp;lt;relativeOutputDirectory&gt;..&amp;lt;/relativeOutputDirectory&gt;
+         &amp;lt;destination&gt;${project.build.directory}/${project.build.finalName}&amp;lt;/destination&gt;
+     &amp;lt;/resource&gt;
+&lt;/pre&gt;</description>
+        </parameter>
+        <parameter>
+          <name>sassOptions</name>
+          <type>java.util.Map</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Defines options for Sass::Plugin.options. See
+{@link ://sass-lang.com/docs/yardoc/file.SASS_REFERENCE.html#options }
+If the value is a string it must by quoted in the maven configuration:
+&amp;lt;cache_location&gt;&apos;/tmp/sass&apos;&amp;lt;/cache_location&gt; &lt;br/&gt;
+If no options are set the default configuration set is used which is:
+
+&lt;pre&gt;
+&amp;lt;unix_newlines&gt;true&amp;lt;/unix_newlines&gt;
+&amp;lt;cache&gt;true&amp;lt;/cache&gt;
+&amp;lt;always_update&gt;true&amp;lt;/always_update&gt;
+&amp;lt;cache_location&gt;${project.build.directory}/sass_cache&amp;lt;/cache_location&gt;
+&amp;lt;style&gt;:expanded&amp;lt;/style&gt;
+&lt;/pre&gt;</description>
+        </parameter>
+        <parameter>
+          <name>sassSourceDirectory</name>
+          <type>java.io.File</type>
+          <required>true</required>
+          <editable>true</editable>
+          <description>Directory containing SASS files, defaults to the Maven Web application sources directory (src/main/webapp)</description>
+        </parameter>
+        <parameter>
+          <name>useCompass</name>
+          <type>boolean</type>
+          <required>false</required>
+          <editable>true</editable>
+          <description>Enable the use of Compass style library mixins, this emulates the
+{@code --compass} commandline option of Sass.</description>
+        </parameter>
+      </parameters>
+      <configuration>
+        <buildDirectory implementation="java.io.File" default-value="${project.build.directory}">${buildDirectory}</buildDirectory>
+        <destination implementation="java.io.File" default-value="${project.build.directory}/${project.build.finalName}">${encoding}</destination>
+        <failOnError implementation="boolean" default-value="true"/>
+        <gemPaths implementation="java.lang.String[]" default-value="${project.build.directory}/rubygems"/>
+        <relativeOutputDirectory implementation="java.lang.String" default-value=".."/>
+        <sassSourceDirectory implementation="java.io.File" default-value="${basedir}/src/main/webapp"/>
+        <useCompass implementation="boolean" default-value="false"/>
+      </configuration>
+    </mojo>
+  </mojos>
+  <dependencies>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <type>jar</type>
+      <version>1.7.15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-core</artifactId>
+      <type>jar</type>
+      <version>1.7.15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <type>jar</type>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <type>jar</type>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-tree</artifactId>
+      <type>jar</type>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-analysis</artifactId>
+      <type>jar</type>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <type>jar</type>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby.joni</groupId>
+      <artifactId>joni</artifactId>
+      <type>jar</type>
+      <version>2.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-netdb</artifactId>
+      <type>jar</type>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-enxio</artifactId>
+      <type>jar</type>
+      <version>0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-x86asm</artifactId>
+      <type>jar</type>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-unixsocket</artifactId>
+      <type>jar</type>
+      <version>0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-posix</artifactId>
+      <type>jar</type>
+      <version>3.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby.extras</groupId>
+      <artifactId>bytelist</artifactId>
+      <type>jar</type>
+      <version>1.0.11</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-constants</artifactId>
+      <type>jar</type>
+      <version>0.8.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby.jcodings</groupId>
+      <artifactId>jcodings</artifactId>
+      <type>jar</type>
+      <version>1.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-ffi</artifactId>
+      <type>jar</type>
+      <version>1.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <type>jar</type>
+      <version>1.2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <type>jar</type>
+      <version>1.2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <type>jar</type>
+      <version>1.13</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jzlib</artifactId>
+      <type>jar</type>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.headius</groupId>
+      <artifactId>invokebinder</artifactId>
+      <type>jar</type>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.martiansoftware</groupId>
+      <artifactId>nailgun-server</artifactId>
+      <type>jar</type>
+      <version>0.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>yecht</artifactId>
+      <type>jar</type>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <type>jar</type>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.headius</groupId>
+      <artifactId>options</artifactId>
+      <type>jar</type>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-stdlib</artifactId>
+      <type>jar</type>
+      <version>1.7.15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <type>jar</type>
+      <version>3.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <type>jar</type>
+      <version>3.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <type>jar</type>
+      <version>2.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <type>jar</type>
+      <version>3.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.sisu</groupId>
+      <artifactId>sisu-inject-plexus</artifactId>
+      <type>jar</type>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-component-annotations</artifactId>
+      <type>jar</type>
+      <version>1.5.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-classworlds</artifactId>
+      <type>jar</type>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.sisu</groupId>
+      <artifactId>sisu-inject-bean</artifactId>
+      <type>jar</type>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.sisu</groupId>
+      <artifactId>sisu-guice</artifactId>
+      <type>jar</type>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.sisu</groupId>
+      <artifactId>sisu-guava</artifactId>
+      <type>jar</type>
+      <version>0.9.9</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <type>jar</type>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <type>jar</type>
+      <version>14.0.1</version>
+    </dependency>
+  </dependencies>
+</plugin>
